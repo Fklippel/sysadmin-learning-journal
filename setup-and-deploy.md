@@ -38,44 +38,44 @@ There is also a reverse proxy layer configured with Nginx.
 
 We have two server blocks. The first handles HTTP requests, redirecting them to HTTPS:
 
-`
+```
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    server_name decidim.lad.pucrs.br;
-    return 301 https://$host$request_uri;
+  # ...
 }
-`
+```
+
 
 The second block is where the actual traffic gets processed. The `ssl` parameter tells Nginx to perform the TLS handshake before processing requests on that port:
 
-`
+```
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
     # ...
-`
+```
 
 ## Let's Encrypt certificate authentication
 
-`
+```
     ssl_certificate     /etc/letsencrypt/live/decidim.lad.pucrs.br/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/decidim.lad.pucrs.br/privkey.pem;
-`
+```
 
 ## Restoring the original visitor IPs from Cloudflare
 
-`
+```
 set_real_ip_from 192.0.2.1;  # full IP list...
 
 real_ip_header CF-Connecting-IP;
-`
+```
 
 By default, Nginx would log every request as coming from Cloudflare's IP addresses, since Cloudflare is the one connecting directly to the server. The `real_ip` module tells Nginx to trust requests coming from Cloudflare's known IP ranges and extract the real visitor IP from the `CF-Connecting-IP` header instead, so logs and application-level IP handling reflect the actual client.
 
 ## Reverse proxy path — how it works
 
-`
+```
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_set_header Host $host;
@@ -85,7 +85,7 @@ By default, Nginx would log every request as coming from Cloudflare's IP address
         proxy_set_header X-Forwarded-Ssl on;
         proxy_set_header X-Forwarded-Port 443;
     }
-`
+```
 
 This block forwards all incoming requests to the Decidim application, which runs inside a Docker container and is exposed locally on port 3000. Since Nginx terminates TLS at this layer, the connection between Nginx and the application itself happens over plain HTTP internally — this is known as **TLS termination**.
 
