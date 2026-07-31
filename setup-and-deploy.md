@@ -28,7 +28,56 @@ It is also important to note that this application is hosted on an Ubuntu VM ser
 - RAM - 4.0Gi
 
 # Backups 
-*(section in progress)*
+
+For the backups, at first there was only a crontab command that would copy the entire database each day:
+`
+0 3 * * * /usr/bin/docker exec production-pg-1 pg_dump -U postgres decidim_production > /home//backups/backup_decidim_$(date +\%F).sql
+`
+However, this approach was soon realized to be a mistake, since the platform still doesn't have much incremental activity from users, which meant that every full copy occupied redundant space in storage. The solution was to automate backups using a crontab + bash script approach. It was decided that dumps would be made every day for 14 days and then recycled. Here is a quick recap of the bash instructions that made this possible:
+
+The script executes a full dump inside the app's container for the PostgreSQL database, checks the exit status of the operation, and logs the result to the log file:
+`
+if docker exec production-pg-1 pg_dump -U postgres -Fc decidim_production > "$FILE"; then
+	logger -t backup-postgres "BACKUP COMPLETED: $FILE ($(du -h "$FILE" | cut -f1))"
+else
+	logger -t backup-postgres -p user.err "BACKUP ERROR"
+	rm -f "$FILE" 
+	exit 1
+fi
+'
+As the platform progresses, it is worth noting that it might be a good idea to consider switching from full dumps to incremental ones, in order to scale more efficiently, minimize space consumption, and lose the least amount of data possible. This comes with the caveat that 'pg_dump' does not natively support incremental backups before PostgreSQL 17, and even that version's support is still very recent.
+
+## a brief about crontab atomations 
+
+Decidim recommends some automations of its own:
+
+`
+# Remove expired download your data files
+0 0 * * * cd /home/user/decidim_application && RAILS_ENV=production bundle exec rake decidim:delete_download_your_data_files
+
+# Compute open data
+2 0 * * * cd /home/user/decidim_application && RAILS_ENV=production bundle exec rake decidim:open_data:export
+
+# Delete old registrations forms
+3 0 * * * cd /home/user/decidim_application && RAILS_ENV=production bundle exec rake decidim_meetings:clean_registration_forms
+
+# Generate reminders
+4 0 * * * cd /home/user/decidim_application && RAILS_ENV=production bundle exec rake decidim:reminders:all
+
+# Send notification mail digest daily
+5 0 * * * cd /home/user/decidim_application && RAILS_ENV=production bundle exec rake decidim:mailers:notifications_digest_daily
+
+# Send notification mail digest weekly on saturdays
+5 0 * * 6 cd /home/user/decidim_application && RAILS_ENV=production bundle exec rake decidim:mailers:notifications_digest_weekly
+
+# Change active step in participatory processes
+*/15 * * * * cd /home/user/decidim_application && RAILS_ENV=production bundle exec rake decidim_participatory_processes:change_active_step
+
+# Delete inactive participants accounts
+0 0 * * * cd /home/user/decidim_application && RAILS_ENV=production bundle exec rake decidim:participants:delete_inactive_participants
+'
+
+All of these are currently in use in the system, except for the deletion of inactive participant accounts, which was deemed unnecessary since the platform is still in its early stages.
 
 # Network and Firewall Environment
 
