@@ -125,7 +125,7 @@ real_ip_header CF-Connecting-IP;
 
 By default, Nginx would log every request as coming from Cloudflare's IP addresses, since Cloudflare is the one connecting directly to the server. The `real_ip` module tells Nginx to trust requests coming from Cloudflare's known IP ranges and extract the real visitor IP from the `CF-Connecting-IP` header instead, so logs and application-level IP handling reflect the actual client.
 
-## Reverse proxy path — how it works
+## Reverse proxy path
 
 ```
     location / {
