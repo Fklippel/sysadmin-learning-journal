@@ -32,7 +32,7 @@ It is also important to note that this application is hosted on an Ubuntu VM ser
 For the backups, at first there was only a crontab command that would copy the entire database each day:
 
 ```
-0 3 * * * /usr/bin/docker exec production-pg-1 pg_dump -U postgres decidim_production > /home//backups/backup_decidim_$(date +\%F).sql
+0 3 * * * /usr/bin/docker exec production-pg-1 pg_dump -U postgres decidim_production > /home/backups/backup_decidim_$(date +\%F).sql
 ```
 
 However, this approach was soon realized to be a mistake, since the platform still doesn't have much incremental activity from users, which meant that every full copy occupied redundant space in storage. The solution was to automate backups using a crontab + bash script approach. It was decided that dumps would be made every day for 14 days and then recycled. Here is a quick recap of the bash instructions that made this possible:
@@ -146,4 +146,4 @@ This block forwards all incoming requests to the Decidim application, which runs
 *(section in progress)*
 
 # CI/CD process
-building a...
+(section in progress)
