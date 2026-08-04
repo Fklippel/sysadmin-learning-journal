@@ -35,7 +35,7 @@ For the backups, at first there was only a crontab command that would copy the e
 0 3 * * * /usr/bin/docker exec production-pg-1 pg_dump -U postgres decidim_production > /home/backups/backup_decidim_$(date +\%F).sql
 ```
 
-However, this approach was soon realized to be a mistake, since the platform still doesn't have much incremental activity from users, which meant that every full copy occupied redundant space in storage. The solution was to automate backups using a crontab + bash script approach. It was decided that dumps would be made every day for 14 days and then recycled. Here is a quick recap of the bash instructions that made this possible:
+However, this approach was soon realized to be a mistake, dumps accumulated indefinitely in storage with no cleanup policy, and the plain text .sql format used more space than necessary. The solution was to automate backups using a crontab + bash script approach. It was decided to switch the plain text dumps for PostgreSQL custom format `-Fc`, also that dumps would be made every day for 14 days and then recycled. Here is a quick recap of the bash instructions that made this possible:
 
 The script executes a full dump inside the app's container for the PostgreSQL database, checks the exit status of the operation, and logs the result to the log file:
 
