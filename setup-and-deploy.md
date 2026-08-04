@@ -49,7 +49,7 @@ else
 fi
 ```
 
-As the platform progresses, it is worth noting that it might be a good idea to consider switching from full dumps to incremental ones, in order to scale more efficiently, minimize space consumption, and lose the least amount of data possible. This comes with the caveat that 'pg_dump' does not natively support incremental backups before PostgreSQL 17, and even that version's support is still very recent.
+As the platform progresses, it is worth noting that it might be a good idea to consider switching from full dumps to incremental ones, in order to scale more efficiently, minimize space consumption, and lose the least amount of data possible. This comes with the caveat since incremental backups tend to be more complex to implement.
 
 ## a brief on crontab atomations 
 
