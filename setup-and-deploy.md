@@ -2,11 +2,11 @@
 
 Here is a quick description of how I got started with the application by setting everything up and deploying it.
 
-# docker compose 
+# Docker compose 
 
 The decision to run the application inside Docker containers was made due to the practicality of the Docker image system and its ability to isolate different parts of the application from each other, providing environment consistency and clean dependency isolation.
 
-With that in mind, this instance uses the decidim-generator image repository to generate its own Decidim application.
+With that in mind, this instance uses the [decidim-generator image repository](https://github.com/decidim/docker) to generate its own Decidim application.
 The docker-compose file defines four services: the application itself, PostgreSQL, Redis, and a background worker (Sidekiq). Both PostgreSQL and Redis have persistent volumes to ensure data isn't lost between container restarts. Each service can be scaled, restarted, or debugged independently without affecting the others.
 
 Restart policies are set to `unless-stopped`, meaning containers automatically restart unless explicitly stopped by the user.
