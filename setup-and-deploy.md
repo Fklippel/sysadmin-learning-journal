@@ -9,9 +9,9 @@ The decision to run the application inside Docker containers was made due to the
 With that in mind, this instance uses the [decidim-generator image repository](https://github.com/decidim/docker) to generate its own Decidim application.
 The docker-compose file defines four services: the application itself, PostgreSQL, Redis, and a background worker (Sidekiq). Both PostgreSQL and Redis have persistent volumes to ensure data isn't lost between container restarts. Each service can be scaled, restarted, or debugged independently without affecting the others.
 
-Restart policies are set to `unless-stopped`, meaning containers automatically restart unless explicitly stopped by the user.
+For production restart policies are set to `unless-stopped`, meaning containers automatically restart unless explicitly stopped by the user.
 
-`depends_on` only guarantees that containers start in order, it doesn't mean the database is actually ready to accept connections. To fix this, pg has a healthcheck and app/worker wait for it to report `service_healthy` before starting. This avoids a common deploy failure: the app trying to connect before the database has finished initializing.
+`depends_on` only guarantees that containers start in order, it doesn't mean the database is actually ready to accept connections. To fix this, in the production environment pg has a healthcheck and app/worker wait for it to report `service_healthy` before starting. This avoids a common deploy failure: the app trying to connect before the database has finished initializing.
 
 Also, development and production use separate `env_files` and separate compose files `docker-compose.yml` and `docker-compose-prod.yml`. This avoids the risk of accidentally running production credentials locally, and keeps environment specific values out of the compose files themselves, which are version-controlled.
 
