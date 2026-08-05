@@ -141,9 +141,5 @@ By default, Nginx would log every request as coming from Cloudflare's IP address
 
 This block forwards all incoming requests to the Decidim application, which runs inside a Docker container and is exposed locally on port 3000. Since Nginx terminates TLS at this layer, the connection between Nginx and the application itself happens over plain HTTP internally — this is known as **TLS termination**.
 
-## Monitoring
-
-*(section in progress)*
-
 # CI/CD process
 (section in progress)
